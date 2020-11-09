@@ -1,1 +1,1 @@
-<h1>This Project is a django api starter preconfigured for extendable user and mysql database support</h1>
+<h1>This Project is a django based blog application preconfigured for extendable user and mysql database support, and api</h1>
