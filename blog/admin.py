@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, Article
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
@@ -37,6 +37,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.site_header = "Dashboard"
-admin.site.site_title = "Factory 14"
+admin.site.site_title = "Blogger"
 admin.site.index_title = "Control Panel"
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Article)
