@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import ArticleSerializer
+from .serializers import ArticleSerializer, RegistrationSerializer
 from .models import Article
 from rest_framework.viewsets import GenericViewSet
 
@@ -51,8 +51,6 @@ def article_update(request,pk):
 @api_view(['GET'])
 def article_toggle_draft(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
-
-
     return Response({"message":"Nothing Happened"})
 
 
@@ -62,3 +60,10 @@ def article_delete(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
     article.delete()
     return Response({"message":f"object with id {pk} , was deleted successfully"})
+
+
+@api_view(['POST'])
+def registratiion_view(request):
+    serializer = RegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
