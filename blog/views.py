@@ -1,9 +1,14 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .serializers import ArticleSerializer, RegistrationSerializer
 from .models import Article
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
 
 
 # Create your views here.
@@ -16,6 +21,7 @@ def api_home(request):
     return Response({"Message":"This is the api root directory"})
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def article_list(request):
     articles = Article.objects.filter(draft=False)
     serializer = ArticleSerializer(articles, many=True)
@@ -23,6 +29,7 @@ def article_list(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def article_detail(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
     # article = Article.objects.get(id=pk, draft=False)
@@ -31,6 +38,7 @@ def article_detail(request,pk):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def article_create(request):
     serializer = ArticleSerializer(data=request.data)
     if serializer.is_valid():
@@ -38,6 +46,7 @@ def article_create(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def article_update(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
     print(request.data)
@@ -49,6 +58,7 @@ def article_update(request,pk):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def article_toggle_draft(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
     return Response({"message":"Nothing Happened"})
@@ -56,6 +66,7 @@ def article_toggle_draft(request,pk):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def article_delete(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
     article.delete()
@@ -63,7 +74,18 @@ def article_delete(request,pk):
 
 
 @api_view(['POST'])
-def registratiion_view(request):
+def registration_view(request):
     serializer = RegistrationSerializer(data=request.data)
+    data = {}
     if serializer.is_valid():
         user = serializer.save()
+        token = Token.objects.get(user=user).key
+        data['token'] = token
+        data['email'] = user.email
+        data['message'] = "User created"
+
+    else:
+        data['message'] = serializer.errors
+
+    return Response(data)
+

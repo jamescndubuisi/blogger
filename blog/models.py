@@ -3,7 +3,9 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -43,20 +45,8 @@ class UserManager(BaseUserManager):
 
 # Create your models here.
 class User(AbstractUser):
-    # nickname = models.CharField(max_length=20, blank=True, null=True)
-    # profile_picture = models.ImageField(upload_to="uploaded_images", null=True, blank=True)
-    # phone_number = models.CharField(max_length=11, blank=True, null=True)
-    # premium = models.BooleanField(default=False)
     created = models.DateField(auto_now=True, blank=True)
-    # exam_subject_combination = models.ManyToManyField(
-    #     "Combination", related_name="combinations"
-    # )
     profile_completed = models.BooleanField(default=False)
-    # first_name = models.CharField( max_length=30, blank=True)
-    # last_name = models.CharField( max_length=30, blank=True)
-    # is_active = models.BooleanField(default=True)
-    # is_staff = models.BooleanField(default=False)
-    # date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
     email = models.EmailField(_("email address"), unique=True, null=True)
     username = None
     USERNAME_FIELD = "email"
@@ -84,6 +74,12 @@ class User(AbstractUser):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+@receiver(post_save, sender= User)
+def create_token(sender,instance=None,created=False, **kwargs):
+    if created:
+        Token.objects.create(user = instance)
+
 
 
 class Article(models.Model):
