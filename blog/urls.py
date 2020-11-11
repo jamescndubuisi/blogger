@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     home,
     api_home,
-    article_list,
+    ArticleListView,
     article_detail,
     article_create,
     article_update,
@@ -17,7 +17,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 urlpatterns = [
     path("", home),
     path("api/", api_home),
-    path("api/article-list/", article_list),
+    path("api/article-list/", ArticleListView.as_view()),
     path("api/article-create/", article_create),
     path("api/article-update/<int:pk>", article_update),
     path("api/article-detail/<int:pk>", article_detail),

@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from .serializers import ArticleSerializer, RegistrationSerializer
 from .models import Article
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.generics import ListAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.authtoken.models import Token
 
 
@@ -20,12 +21,14 @@ def home(request):
 def api_home(request):
     return Response({"Message":"This is the api root directory"})
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def article_list(request):
-    articles = Article.objects.filter(draft=False)
-    serializer = ArticleSerializer(articles, many=True)
-    return Response(serializer.data)
+
+class ArticleListView(ListAPIView):
+    queryset = Article.objects.filter(draft=False).order_by('created')
+    serializer_class = ArticleSerializer
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [IsAuthenticated,]
+    pagination_class = PageNumberPagination
+
 
 
 @api_view(['GET'])

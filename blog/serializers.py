@@ -3,9 +3,18 @@ from .models import Article, User
 
 
 class ArticleSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField('get_author_name')
+
     class Meta:
         model = Article
-        fields = "__all__"
+        fields = ['title', 'created_by', 'modified','created','body','draft', 'author_name']
+
+    def get_author_name(self, article):
+        author_name= article.created_by.email
+        return author_name
+
+
+
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
