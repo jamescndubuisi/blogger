@@ -41,6 +41,11 @@ INSTALLED_APPS = [
     "rest_framework",
     'rest_framework.authtoken',
     "blog",
+    "fluent_comments", # must be before django_comments
+    'crispy_forms',
+    'django_comments',
+    "threadedcomments",
+    'django.contrib.sites',
 
 ]
 
@@ -164,3 +169,9 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'blogger <blogger@zohomail.com>'
+
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+COMMENTS_APP = 'fluent_comments'
+
