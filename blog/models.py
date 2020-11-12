@@ -46,7 +46,7 @@ class UserManager(BaseUserManager):
 # Create your models here.
 class User(AbstractUser):
     created = models.DateField(auto_now=True, blank=True)
-    profile_completed = models.BooleanField(default=False)
+    # profile_completed = models.BooleanField(default=False)
     email = models.EmailField(_("email address"), unique=True, null=True)
     username = None
     USERNAME_FIELD = "email"

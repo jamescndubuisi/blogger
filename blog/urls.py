@@ -9,7 +9,8 @@ from .views import (
     article_delete,
     article_toggle_draft,
     registration_view,
-
+    UserListView,
+    GetUpdateDeleteUser,
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -25,4 +26,6 @@ urlpatterns = [
     path("api/article-toggle-draft/<int:pk>", article_toggle_draft),
     path("api/register", registration_view),
     path("api/api-login", obtain_auth_token),
+    path("api/users/", UserListView.as_view()),
+    path("api/users/<int:pk>", GetUpdateDeleteUser.as_view()),
 ]

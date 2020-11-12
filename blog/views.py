@@ -1,12 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from .serializers import ArticleSerializer, RegistrationSerializer
-from .models import Article
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.generics import ListAPIView
+from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer
+from .models import Article, User
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authtoken.models import Token
@@ -16,6 +15,7 @@ from rest_framework.authtoken.models import Token
 def home(request):
     message = "Welcome"
     return render(request,'index.html',{"message":message})
+
 
 @api_view(['GET'])
 def api_home(request):
@@ -28,14 +28,14 @@ class ArticleListView(ListAPIView):
     authentication_classes = [TokenAuthentication,]
     permission_classes = [IsAuthenticated,]
     pagination_class = PageNumberPagination
-
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ("title","created_by__email","body")
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def article_detail(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
-    # article = Article.objects.get(id=pk, draft=False)
     serializer = ArticleSerializer(article, many=False)
     return Response(serializer.data)
 
@@ -48,6 +48,7 @@ def article_create(request):
         serializer.save()
     return Response(serializer.data)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def article_update(request,pk):
@@ -57,7 +58,6 @@ def article_update(request,pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
-
 
 
 @api_view(['GET'])
@@ -73,7 +73,7 @@ def article_toggle_draft(request,pk):
 def article_delete(request,pk):
     article = get_object_or_404(Article,id=pk,draft=False)
     article.delete()
-    return Response({"message":f"object with id {pk} , was deleted successfully"})
+    return Response({"message" : f"object with id {pk} , was deleted successfully"})
 
 
 @api_view(['POST'])
@@ -86,9 +86,24 @@ def registration_view(request):
         data['token'] = token
         data['email'] = user.email
         data['message'] = "User created"
-
     else:
         data['message'] = serializer.errors
-
     return Response(data)
+
+
+
+class UserListView(ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
+    authentication_classes = [TokenAuthentication, ]
+    queryset = User.objects.all()
+
+
+class GetUpdateDeleteUser(RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
+    authentication_classes = [TokenAuthentication, ]
+    queryset = User.objects.all()
+
+
 
