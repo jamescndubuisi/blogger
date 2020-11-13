@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block config %}
+    <style>
+    .textarea{
+        height: 70px;
+    }
+    </style>
+
+{% endblock  %}
+
+{% block description %}
+
+{% endblock %}
+
+{% block og-url %}
+
+{% endblock %}
+
+{% block og-title %}
+
+{% endblock %}
+
+{% block og-description %}
+
+{% endblock %}
+
+{% block og-image %}
+
+{% endblock %}
+
+
+{% block title %}
+    Home
+
+{% endblock %}
+
+{% block nav %}
+
+{% endblock  %}
+
+{% block content %}
+    <h3>{{ article.title }}</h3>
+    <p >{{ article.body }}</p>
+    <sub>created by: {{ article.created_by }}</sub>
+    <sub>published on : {{ article.created }}</sub>
+    <sub>modified on : {{ article.modified }}</sub>
+    {% load comments static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'fluent_comments/css/ajaxcomments.css' %}" />
+<script type="text/javascript" src="{% static 'fluent_comments/js/ajaxcomments.js' %}"></script>
+
+{% render_comment_list for object %}
+{% render_comment_form for object %}
+{% endblock  %}
+

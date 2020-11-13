@@ -1,6 +1,5 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
-    home,
     api_home,
     ArticleListView,
     article_detail,
@@ -11,12 +10,13 @@ from .views import (
     registration_view,
     UserListView,
     GetUpdateDeleteUser,
+    ArticleList,
+    ArticleDetail,
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path("", home),
     path("api/", api_home),
     path("api/article-list/", ArticleListView.as_view()),
     path("api/article-create/", article_create),
@@ -28,4 +28,8 @@ urlpatterns = [
     path("api/api-login", obtain_auth_token),
     path("api/users/", UserListView.as_view()),
     path("api/users/<int:pk>", GetUpdateDeleteUser.as_view()),
+    path('comments/', include('fluent_comments.urls')),
+    # Template based url
+    path("", ArticleList.as_view(), name = "home"),
+    path("<slug:slug>/", ArticleDetail.as_view(), name = "home"),
 ]

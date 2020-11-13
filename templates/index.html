@@ -1,10 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block config %}
+
+{% endblock  %}
+
+{% block description %}
+
+{% endblock %}
+
+{% block og-url %}
+
+{% endblock %}
+
+{% block og-title %}
+
+{% endblock %}
+
+{% block og-description %}
+
+{% endblock %}
+
+{% block og-image %}
+
+{% endblock %}
+
+
+{% block title %}
+    Home
+
+{% endblock %}
+
+{% block nav %}
+
+{% endblock  %}
+
+{% block content %}
+    {% for article in articles %}
+<h4><a href="{{ article.slug }}">{{ article.title }}</a></h4>
+        <p>{{ article.body | truncatewords:70 }}</p>
+{% endfor %}
+{% endblock  %}
+

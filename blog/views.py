@@ -9,12 +9,20 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authtoken.models import Token
+from django.views import generic
 
 
 # Create your views here.
-def home(request):
-    message = "Welcome"
-    return render(request,'index.html',{"message":message})
+class ArticleList(generic.ListView):
+    template_name = "index.html"
+    context_object_name = "articles"
+    queryset = Article.objects.all()
+
+class ArticleDetail(generic.DetailView):
+    template_name = "articledetail.html"
+    context_object_name = "article"
+    model = Article
+    slug_field = "slug"
 
 
 @api_view(['GET'])

@@ -158,7 +158,9 @@ TEMPLATE_DIRS = (os.path.join(BASE_DIR,  'templates'),)
 LOGIN_URL = 'log_in'
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "log_in"
-
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+MEDIA_ROOT = os.path.join(BASE_DIR, "static/media")
+MEDIA_URL = "/media/"
 
 
 #Email settings
@@ -174,4 +176,6 @@ DEFAULT_FROM_EMAIL = 'blogger <blogger@zohomail.com>'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 COMMENTS_APP = 'fluent_comments'
-
+FLUENT_COMMENTS_FIELD_ORDER = ('comment', 'name')
+FLUENT_COMMENTS_EXCLUDE_FIELDS = ('email', 'url')
+SITE_ID = 1

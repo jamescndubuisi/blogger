@@ -36,8 +36,12 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
+
+class ArticleAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug':('title',),}
+
 admin.site.site_header = "Dashboard"
 admin.site.site_title = "Blogger"
 admin.site.index_title = "Control Panel"
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Article)
+admin.site.register(Article, ArticleAdmin)

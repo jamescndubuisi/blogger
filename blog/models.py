@@ -85,6 +85,8 @@ def create_token(sender,instance=None,created=False, **kwargs):
 class Article(models.Model):
     title = models.CharField(max_length=50)
     body = models.TextField()
+    slug = models.SlugField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now= True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
