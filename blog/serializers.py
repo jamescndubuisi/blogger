@@ -1,6 +1,14 @@
 from rest_framework import serializers
 from .models import Article, User
-from fluent_comments.models import get_comments_model, FluentComment
+from fluent_comments.models import FluentComment
+
+
+class RecursiveField(serializers.Serializer):
+
+    def to_representation(self, instance):
+        serializers = self.parent.parent.__class__(instance,context = self.context)
+        return serializers.data
+
 
 class ArticleSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField('get_author_name')
@@ -16,11 +24,11 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
+    children = RecursiveField(many=True)
     class Meta:
         model = FluentComment
-        fields = "__all__"
-
+        # fields = "__all__"
+        fields = ['comment',"id","children"]
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField("get_comments")
@@ -36,7 +44,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
 
 
     def get_comments(self, article):
-        comment= FluentComment.objects.filter(object_pk=article.id)
+        comment= FluentComment.objects.filter(object_pk=article.id, parent_id=None)
         serializer = CommentSerializer(comment, many=True)
         return serializer.data
 
