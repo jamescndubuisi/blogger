@@ -2,7 +2,7 @@ from django.urls import path, include
 from .views import (
     api_home,
     ArticleListView,
-    article_detail,
+    # article_detail,
     article_create,
     article_update,
     article_delete,
@@ -12,6 +12,7 @@ from .views import (
     GetUpdateDeleteUser,
     ArticleList,
     ArticleDetail,
+    ArticleDetailView,
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -21,7 +22,7 @@ urlpatterns = [
     path("api/article-list/", ArticleListView.as_view()),
     path("api/article-create/", article_create),
     path("api/article-update/<int:pk>", article_update),
-    path("api/article-detail/<int:pk>", article_detail),
+    path("api/article-detail/<int:pk>", ArticleDetailView.as_view()),
     path("api/article-delete/<int:pk>", article_delete),
     path("api/article-toggle-draft/<int:pk>", article_toggle_draft),
     path("api/register", registration_view),

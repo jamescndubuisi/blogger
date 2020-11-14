@@ -1,15 +1,16 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer
+from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer, ArticleDetailSerializer
 from .models import Article, User
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authtoken.models import Token
 from django.views import generic
+from fluent_comments.models import FluentComment
 
 
 # Create your views here.
@@ -40,12 +41,27 @@ class ArticleListView(ListAPIView):
     search_fields = ("title","created_by__email","body")
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def article_detail(request,pk):
-    article = get_object_or_404(Article,id=pk,draft=False)
-    serializer = ArticleSerializer(article, many=False)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def article_detail(request,pk):
+#     article = get_object_or_404(Article,id=pk,draft=False)
+#     serializer = ArticleSerializer(article, many=False)
+#     return Response(serializer.data)
+
+
+# class ArticleDetailView(RetrieveUpdateDestroyAPIView):
+#     model = Article
+#     serializer_class = ArticleDetailSerializer
+#     authentication_classes = [TokenAuthentication, ]
+#     permission_classes = [IsAuthenticated, ]
+#     pagination_class = PageNumberPagination
+class ArticleDetailView(RetrieveAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleDetailSerializer
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+    pagination_class = PageNumberPagination
+
 
 
 @api_view(['POST'])
