@@ -16,9 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from blog import urls
+from django.contrib.staticfiles.urls import static, staticfiles_urlpatterns
+from blogger import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(urls)),
 
 ]
+
+
+handler404 = 'blog.views.not_found'
+handler500 = 'blog.views.server_error'
+handler403 = 'blog.views.permission_denied'
+handler400 = 'blog.views.bad_request'
+urlpatterns += staticfiles_urlpatterns()
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

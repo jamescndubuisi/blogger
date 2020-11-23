@@ -24,6 +24,7 @@ from .views import (
     ArticleDetailView,
     CreateComment,
     CommentViewSet,
+api_permission_denied,
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -49,5 +50,6 @@ urlpatterns = [
     path("comments/", include("fluent_comments.urls")),
     # Template based article routes
     path("", ArticleList.as_view(), name="home"),
-    path("<slug:slug>/", ArticleDetail.as_view(), name="home"),
+    path("<slug:slug>/", ArticleDetail.as_view(), name="none"),
+    path("permission-denied", api_permission_denied, name="permission_denied"),
 ]

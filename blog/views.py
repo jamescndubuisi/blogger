@@ -108,7 +108,7 @@ class UpdateArticle(UserPassesTestMixin,RetrieveUpdateDestroyAPIView):
     authentication_classes = [TokenAuthentication, ]
     permission_classes = [IsAuthenticated, ]
     pagination_class = PageNumberPagination
-    login_url = "/err"
+    login_url = "permission_denied"
 
     def test_func(self):
         article = Article.objects.get(pk = self.kwargs.get("pk"))
@@ -189,3 +189,31 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = FluentComment.objects.create(object_pk=poll,comment=comment, submit_date=submit_date,   content_type_id=content,user_id = self.request.user.id,site_id=settings.SITE_ID, parent_id=parent)
             serializer = CommentSerializer(comment,context=  {'request': request})
             return Response(serializer.data)
+
+
+
+## Error Pages
+def server_error(request):
+    data = request.path
+    return render(request, "errors/500.html", {"data": data})
+
+
+def not_found(request, exception):
+    data = request.path
+    print(data)
+    return render(request, "errors/404.html", {"data": data})
+
+
+def permission_denied(request, exception):
+    data = request.path
+    return render(request, "errors/403.html", {"data": data})
+
+@api_view(['GET'])
+def api_permission_denied(request):
+    data = request.path
+    return Response(status=403, data={"message":"Permission denied"})
+
+
+def bad_request(request, exception):
+    data = request.path
+    return render(request, "errors/400.html", {"data": data})
