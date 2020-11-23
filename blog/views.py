@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer, ArticleDetailSerializer
+from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer, CommentSerializer, ArticleDetailSerializer, NormalCommentSerializer
 from .models import Article, User
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -11,6 +11,11 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.authtoken.models import Token
 from django.views import generic
 from fluent_comments.models import FluentComment
+from rest_framework import viewsets
+from django.contrib.contenttypes.models import ContentType
+import datetime
+from blogger import settings
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -31,37 +36,39 @@ def api_home(request):
     return Response({"Message":"This is the api root directory"})
 
 
-class ArticleListView(ListAPIView):
-    queryset = Article.objects.filter(draft=False).order_by('created')
-    serializer_class = ArticleSerializer
-    authentication_classes = [TokenAuthentication,]
-    permission_classes = [IsAuthenticated,]
-    pagination_class = PageNumberPagination
-    filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ("title","created_by__email","body")
-
-
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def article_detail(request,pk):
-#     article = get_object_or_404(Article,id=pk,draft=False)
-#     serializer = ArticleSerializer(article, many=False)
-#     return Response(serializer.data)
-
-
-# class ArticleDetailView(RetrieveUpdateDestroyAPIView):
-#     model = Article
-#     serializer_class = ArticleDetailSerializer
-#     authentication_classes = [TokenAuthentication, ]
-#     permission_classes = [IsAuthenticated, ]
-#     pagination_class = PageNumberPagination
-class ArticleDetailView(RetrieveAPIView):
-    queryset = Article.objects.all()
-    serializer_class = ArticleDetailSerializer
+class CreateComment(CreateAPIView):
+    model = FluentComment
+    serializer_class = NormalCommentSerializer
     authentication_classes = [TokenAuthentication, ]
     permission_classes = [IsAuthenticated, ]
     pagination_class = PageNumberPagination
 
+
+
+class ArticleListView(ListAPIView):
+    queryset = Article.objects.filter(draft=False).order_by('created')
+    serializer_class = ArticleSerializer
+    # authentication_classes = [TokenAuthentication,]
+    # permission_classes = [IsAuthenticated,]
+    pagination_class = PageNumberPagination
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ("title","created_by__email","body")
+
+class ArticleDetailView(RetrieveAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleDetailSerializer
+    # authentication_classes = [TokenAuthentication, ]
+    # permission_classes = [IsAuthenticated, ]
+    pagination_class = PageNumberPagination
+
+
+
+class CommentEditDeleteView(RetrieveUpdateDestroyAPIView):
+    queryset = FluentComment.objects.all()
+    serializer_class = NormalCommentSerializer
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+    pagination_class = PageNumberPagination
 
 
 @api_view(['POST'])
@@ -131,3 +138,28 @@ class GetUpdateDeleteUser(RetrieveUpdateDestroyAPIView):
 
 
 
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = FluentComment.objects.all()
+    serializer_class = CommentSerializer
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+
+    # @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        return super(CommentViewSet,self).dispatch(request,*args, **kwargs)
+
+    # @csrf_exempt
+    def create(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            data = self.request.data
+            comment = data['comment']
+            poll = data['object_pk']
+            if 'parent' in data:
+                parent = data['parent']
+            else:
+                parent = None
+            submit_date = datetime.datetime.now()
+            content = ContentType.objects.get(model="Article").pk
+            comment = FluentComment.objects.create(object_pk=poll,comment=comment, submit_date=submit_date,   content_type_id=content,user_id = self.request.user.id,site_id=settings.SITE_ID, parent_id=parent)
+            serializer = CommentSerializer(comment,context=  {'request': request})
+            return Response(serializer.data)

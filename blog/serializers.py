@@ -15,7 +15,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['title', 'created_by', 'modified','created','body','draft', 'author_name']
+        fields = ["id",'title', 'created_by', 'modified','created','body','draft', 'author_name']
 
     def get_author_name(self, article):
         author_name= article.created_by.email
@@ -28,7 +28,19 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FluentComment
         # fields = "__all__"
-        fields = ['comment',"id","children"]
+        fields = ['comment',"id","children","content_type"]
+
+
+
+
+class NormalCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FluentComment
+        fields = ['comment',"id","parent","content_type_id","object_pk"]
+
+
+
+
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField("get_comments")
