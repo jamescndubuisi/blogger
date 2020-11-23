@@ -15,7 +15,21 @@ from rest_framework import viewsets
 from django.contrib.contenttypes.models import ContentType
 import datetime
 from blogger import settings
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+
+def user_is_owner(func):
+
+    def check_and_call(request,*args,**kwargs):
+        pk=kwargs['pk']
+        article = Article.objects.get(pk)
+        if not (article.user.id==request.user.id):
+            return Response(status=403,data={'message':"you are not the rightful owner"}, content_type="application/json")
+        return func(request,*args,**kwargs)
+    return check_and_call
 
 
 # Create your views here.
@@ -48,8 +62,6 @@ class CreateComment(CreateAPIView):
 class ArticleListView(ListAPIView):
     queryset = Article.objects.filter(draft=False).order_by('created')
     serializer_class = ArticleSerializer
-    # authentication_classes = [TokenAuthentication,]
-    # permission_classes = [IsAuthenticated,]
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ("title","created_by__email","body")
@@ -57,8 +69,6 @@ class ArticleListView(ListAPIView):
 class ArticleDetailView(RetrieveAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleDetailSerializer
-    # authentication_classes = [TokenAuthentication, ]
-    # permission_classes = [IsAuthenticated, ]
     pagination_class = PageNumberPagination
 
 
@@ -80,15 +90,31 @@ def article_create(request):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def article_update(request,pk):
-    article = get_object_or_404(Article,id=pk,draft=False)
-    print(request.data)
-    serializer = ArticleSerializer(instance=article,data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
+# @api_view(['PUT'])
+# @permission_classes([IsAuthenticated])
+# # @user_is_owner
+# def article_update(request,pk):
+#     article = get_object_or_404(Article,id=pk,draft=False)
+#     print(request.data)
+#     serializer = ArticleSerializer(instance=article,data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#     return Response(serializer.data)
+
+
+class UpdateArticle(UserPassesTestMixin,RetrieveUpdateDestroyAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+    pagination_class = PageNumberPagination
+    login_url = "/err"
+
+    def test_func(self):
+        article = Article.objects.get(pk = self.kwargs.get("pk"))
+        return self.request.user is article.created_by
+
+
 
 
 @api_view(['GET'])
