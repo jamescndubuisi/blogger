@@ -1,4 +1,4 @@
-django>=3.1
+django>=4.2.20
 django-cors-headers== 3.5.0
 django-crispy-forms== 1.9.1
 django-fluent-comments==  2.1
