@@ -1,11 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.utils.translation import ugettext_lazy as _
+# from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -75,11 +77,11 @@ class User(AbstractUser):
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
+
 @receiver(post_save, sender= User)
 def create_token(sender,instance=None,created=False, **kwargs):
     if created:
         Token.objects.create(user = instance)
-
 
 
 class Article(models.Model):

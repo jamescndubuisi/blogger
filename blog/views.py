@@ -1,34 +1,34 @@
+import datetime
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render, get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
-from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer, CommentSerializer, ArticleDetailSerializer, NormalCommentSerializer
-from .models import Article, User
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView, CreateAPIView
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.authtoken.models import Token
 from django.views import generic
 from fluent_comments.models import FluentComment
 from rest_framework import viewsets
-from django.contrib.contenttypes.models import ContentType
-import datetime
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
+
 from blogger import settings
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.mixins import UserPassesTestMixin
+from .models import Article, User
+from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer, CommentSerializer, \
+    ArticleDetailSerializer, NormalCommentSerializer
 
 
 def user_is_owner(func):
-
-    def check_and_call(request,*args,**kwargs):
-        pk=kwargs['pk']
+    def check_and_call(request, *args, **kwargs):
+        pk = kwargs['pk']
         article = Article.objects.get(pk)
-        if not (article.user.id==request.user.id):
-            return Response(status=403,data={'message':"you are not the rightful owner"}, content_type="application/json")
-        return func(request,*args,**kwargs)
+        if not (article.user.id == request.user.id):
+            return Response(status=403, data={'message': "you are not the rightful owner"},
+                            content_type="application/json")
+        return func(request, *args, **kwargs)
+
     return check_and_call
 
 
@@ -37,6 +37,7 @@ class ArticleList(generic.ListView):
     template_name = "index.html"
     context_object_name = "articles"
     queryset = Article.objects.all()
+
 
 class ArticleDetail(generic.DetailView):
     template_name = "articledetail.html"
@@ -47,7 +48,7 @@ class ArticleDetail(generic.DetailView):
 
 @api_view(['GET'])
 def api_home(request):
-    return Response({"Message":"This is the api root directory"})
+    return Response({"Message": "This is the api root directory"})
 
 
 class CreateComment(CreateAPIView):
@@ -58,19 +59,18 @@ class CreateComment(CreateAPIView):
     pagination_class = PageNumberPagination
 
 
-
 class ArticleListView(ListAPIView):
     queryset = Article.objects.filter(draft=False).order_by('created')
     serializer_class = ArticleSerializer
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ("title","created_by__email","body")
+    search_fields = ("title", "created_by__email", "body")
+
 
 class ArticleDetailView(RetrieveAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleDetailSerializer
     pagination_class = PageNumberPagination
-
 
 
 class CommentEditDeleteView(RetrieveUpdateDestroyAPIView):
@@ -102,7 +102,7 @@ def article_create(request):
 #     return Response(serializer.data)
 
 
-class UpdateArticle(UserPassesTestMixin,RetrieveUpdateDestroyAPIView):
+class UpdateArticle(UserPassesTestMixin, RetrieveUpdateDestroyAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     authentication_classes = [TokenAuthentication, ]
@@ -111,26 +111,23 @@ class UpdateArticle(UserPassesTestMixin,RetrieveUpdateDestroyAPIView):
     login_url = "permission_denied"
 
     def test_func(self):
-        article = Article.objects.get(pk = self.kwargs.get("pk"))
+        article = Article.objects.get(pk=self.kwargs.get("pk"))
         return self.request.user is article.created_by
-
-
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def article_toggle_draft(request,pk):
-    article = get_object_or_404(Article,id=pk,draft=False)
-    return Response({"message":"Nothing Happened"})
-
+def article_toggle_draft(request, pk):
+    article = get_object_or_404(Article, id=pk, draft=False)
+    return Response({"message": "Nothing Happened"})
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def article_delete(request,pk):
-    article = get_object_or_404(Article,id=pk,draft=False)
+def article_delete(request, pk):
+    article = get_object_or_404(Article, id=pk, draft=False)
     article.delete()
-    return Response({"message" : f"object with id {pk} , was deleted successfully"})
+    return Response({"message": f"object with id {pk} , was deleted successfully"})
 
 
 @api_view(['POST'])
@@ -148,7 +145,6 @@ def registration_view(request):
     return Response(data)
 
 
-
 class UserListView(ListAPIView):
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
@@ -163,7 +159,6 @@ class GetUpdateDeleteUser(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
 
 
-
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = FluentComment.objects.all()
     serializer_class = CommentSerializer
@@ -172,7 +167,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     # @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
-        return super(CommentViewSet,self).dispatch(request,*args, **kwargs)
+        return super(CommentViewSet, self).dispatch(request, *args, **kwargs)
 
     # @csrf_exempt
     def create(self, request, *args, **kwargs):
@@ -186,10 +181,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                 parent = None
             submit_date = datetime.datetime.now()
             content = ContentType.objects.get(model="Article").pk
-            comment = FluentComment.objects.create(object_pk=poll,comment=comment, submit_date=submit_date,   content_type_id=content,user_id = self.request.user.id,site_id=settings.SITE_ID, parent_id=parent)
-            serializer = CommentSerializer(comment,context=  {'request': request})
+            comment = FluentComment.objects.create(object_pk=poll, comment=comment, submit_date=submit_date,
+                                                   content_type_id=content, user_id=self.request.user.id,
+                                                   site_id=settings.SITE_ID, parent_id=parent)
+            serializer = CommentSerializer(comment, context={'request': request})
             return Response(serializer.data)
-
 
 
 ## Error Pages
@@ -208,10 +204,11 @@ def permission_denied(request, exception):
     data = request.path
     return render(request, "errors/403.html", {"data": data})
 
+
 @api_view(['GET'])
 def api_permission_denied(request):
     data = request.path
-    return Response(status=403, data={"message":"Permission denied"})
+    return Response(status=403, data={"message": "Permission denied"})
 
 
 def bad_request(request, exception):

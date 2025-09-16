@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,8 +44,10 @@ INSTALLED_APPS = [
     "rest_framework",
     'rest_framework.authtoken',
     "blog",
-    "fluent_comments", # must be before django_comments
+    "fluent_comments",
     'crispy_forms',
+    # "bootstrap5",
+    'crispy_bootstrap5',
     'django_comments',
     "threadedcomments",
     'django.contrib.sites',
@@ -50,7 +55,6 @@ INSTALLED_APPS = [
 ]
 
 
-#
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -97,21 +101,27 @@ WSGI_APPLICATION = 'blogger.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'starter',
-        'USER': 'starter',
-        'PASSWORD': 'starter',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
-        'OPTIONS': {
-         "init_command": "SET foreign_key_checks = 0;",
-         },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'starter',
+#         'USER': 'starter',
+#         'PASSWORD': 'starter',
+#         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+#         'PORT': '3306',
+#         'OPTIONS': {
+#          "init_command": "SET foreign_key_checks = 0;",
+#          },
+#     }
+# }
 
 
 # Password validation
@@ -173,9 +183,14 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'blogger <blogger@zohomail.com>'
 
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 COMMENTS_APP = 'fluent_comments'
 FLUENT_COMMENTS_FIELD_ORDER = ('comment', 'name')
 FLUENT_COMMENTS_EXCLUDE_FIELDS = ('email', 'url')
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+
 SITE_ID = 1
