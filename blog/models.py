@@ -7,6 +7,10 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.conf import settings
+from django.utils.text import slugify
+from django.utils import timezone
+from django.urls import reverse
 
 
 class UserManager(BaseUserManager):
@@ -85,14 +89,44 @@ def create_token(sender,instance=None,created=False, **kwargs):
 
 
 class Article(models.Model):
-    title = models.CharField(max_length=50)
+    DRAFT = 'draft'
+    PUBLISHED = 'published'
+    STATUS_CHOICES = (
+        (DRAFT, 'Draft'),
+        (PUBLISHED, 'Published'),
+    )
+    title = models.CharField(max_length=200)
     body = models.TextField()
-    slug = models.SlugField(max_length=50, null=True, blank=True)
-    description = models.CharField(max_length=100, null=True, blank=True)
+    slug = models.SlugField(max_length=200, unique=True, db_index=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now= True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    draft = models.BooleanField(default=True)
+    modified = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=DRAFT)
+    published_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('-published_date', '-created')
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        # auto-fill slug if missing
+        if not self.slug:
+            base = slugify(self.title)[:180]
+            slug = base
+            n = 1
+            while Article.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base}-{n}"
+                n += 1
+            self.slug = slug
+
+        # if set published -> set published_date
+        if self.status == self.PUBLISHED and not self.published_date:
+            self.published_date = timezone.now()
+
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('article_detail', kwargs={'slug': self.slug})

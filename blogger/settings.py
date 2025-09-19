@@ -156,8 +156,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
@@ -172,7 +170,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 MEDIA_ROOT = os.path.join(BASE_DIR, "static/media")
 MEDIA_URL = "/media/"
 
-
 #Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.zoho.com'
@@ -181,16 +178,10 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'blogger <blogger@zohomail.com>'
-
-
-
-
 COMMENTS_APP = 'fluent_comments'
 FLUENT_COMMENTS_FIELD_ORDER = ('comment', 'name')
 FLUENT_COMMENTS_EXCLUDE_FIELDS = ('email', 'url')
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-
 
 SITE_ID = 1

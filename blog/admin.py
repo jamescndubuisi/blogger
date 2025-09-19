@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import User, Article
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-
 from django.contrib.auth.admin import UserAdmin
+
 
 # Register your models here.
 
@@ -36,9 +36,13 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
-
 class ArticleAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug':('title',),}
+    list_display = ('title', 'created_by', 'status', 'published_date', 'created')
+    list_filter = ('status', 'created_by')
+    prepopulated_fields = {'slug': ('title',)}
+    search_fields = ('title', 'body')
+    ordering = ('-published_date',)
+
 
 admin.site.site_header = "Dashboard"
 admin.site.site_title = "Blogger"

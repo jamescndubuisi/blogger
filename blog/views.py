@@ -13,11 +13,12 @@ from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, R
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from blogger import settings
 from .models import Article, User
 from .serializers import ArticleSerializer, RegistrationSerializer, UserSerializer, CommentSerializer, \
     ArticleDetailSerializer, NormalCommentSerializer
+from django.db.models import Q
 
 
 def user_is_owner(func):
@@ -32,11 +33,17 @@ def user_is_owner(func):
     return check_and_call
 
 
-# Create your views here.
 class ArticleList(generic.ListView):
     template_name = "index.html"
     context_object_name = "articles"
-    queryset = Article.objects.all()
+    paginate_by = 6
+
+    def get_queryset(self):
+        qs = Article.objects.filter(status=Article.PUBLISHED)
+        q = self.request.GET.get('q')
+        if q:
+            qs = qs.filter(Q(title__icontains=q) | Q(body__icontains=q) | Q(description__icontains=q))
+        return qs
 
 
 class ArticleDetail(generic.DetailView):
@@ -44,6 +51,44 @@ class ArticleDetail(generic.DetailView):
     context_object_name = "article"
     model = Article
     slug_field = "slug"
+    slug_url_kwarg = "slug"
+
+
+class ArticleCreate(LoginRequiredMixin, generic.CreateView):
+    model = Article
+    fields = ['title', 'body', 'description', 'status']
+    template_name = 'article_form.html'
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+
+class ArticleUpdate(LoginRequiredMixin, generic.UpdateView):
+    model = Article
+    fields = ['title', 'body', 'description', 'status']
+    template_name = 'article_form.html'
+    slug_field = 'slug'
+
+
+class ArticleDelete(LoginRequiredMixin, generic.DeleteView):
+    model = Article
+    template_name = 'article_confirm_delete.html'
+    success_url = '/'
+
+
+# Create your views here.
+# class ArticleList(generic.ListView):
+#     template_name = "index.html"
+#     context_object_name = "articles"
+#     queryset = Article.objects.all()
+#
+#
+# class ArticleDetail(generic.DetailView):
+#     template_name = "articledetail.html"
+#     context_object_name = "article"
+#     model = Article
+#     slug_field = "slug"
 
 
 @api_view(['GET'])
@@ -60,7 +105,7 @@ class CreateComment(CreateAPIView):
 
 
 class ArticleListView(ListAPIView):
-    queryset = Article.objects.filter(draft=False).order_by('created')
+    queryset = Article.objects.filter(status='Published').order_by('created')
     serializer_class = ArticleSerializer
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
