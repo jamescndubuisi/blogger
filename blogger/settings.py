@@ -9,9 +9,15 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
+import environ
 import os
+import django
 from pathlib import Path
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,6 +30,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '2z#9%t%4_uqzmo%!&(ax@n@0*4g8)5r0-y#g$7#52h-79i(znr'
+GEMINI_API_KEY = os.environ.get("GOOGLE_API", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -34,6 +42,8 @@ AUTH_USER_MODEL = "blog.user"
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
+    "unfold.contrib.forms",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,6 +61,7 @@ INSTALLED_APPS = [
     'django_comments',
     "threadedcomments",
     'django.contrib.sites',
+    # 'unfold',
 
 ]
 
@@ -122,6 +133,19 @@ DATABASES = {
 #          },
 #     }
 # }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": env("DB_NAME"),
+#         "USER": env("DB_USER"),
+#         "PASSWORD": env("DB_PASSWORD"),
+#         "HOST": "localhost",
+#         "PORT": "5433",
+#     }
+# }
+
+
 
 
 # Password validation

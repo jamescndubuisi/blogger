@@ -1,0 +1,14 @@
+{# templates/admin/blog/article/change_form.html #}
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block object-tools %}
+  {{ block.super }}
+  {% if change and original %}
+    <li>
+      <a class="addlink" href="{% url 'admin:blog_article_generate_gemini' original.pk %}">
+        Generate with Gemini
+      </a>
+    </li>
+  {% endif %}
+{% endblock %}

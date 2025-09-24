@@ -1,0 +1,70 @@
+<!-- blog/templates/admin/blog/article/regenerate_gemini.html -->
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}Regenerate "{{ article.title }}" with Gemini{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url 'admin:blog_article_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; <a href="{% url 'admin:blog_article_change' article.pk %}">{{ article.title|truncatechars:30 }}</a>
+  &rsaquo; {% trans 'Regenerate with Gemini' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="px-6 py-4">
+  <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
+    🔄 Regenerate "{{ article.title }}" with Gemini
+  </h1>
+
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-3">Current Article Info</h2>
+    <p><strong>Title:</strong> {{ article.title }}</p>
+    <p><strong>Description:</strong> {{ article.description|default:"None" }}</p>
+    <p><strong>Status:</strong> {{ article.get_status_display }}</p>
+    <p><strong>Current Word Count:</strong> <span class="font-bold text-blue-600">{{ article.body|wordcount }}</span> words</p>
+  </div>
+
+  <form method="post" class="max-w-2xl">
+    {% csrf_token %}
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Target Word Count
+        </label>
+        <input type="number" name="word_target" value="800" min="200" max="3000"
+               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Approximate target for regenerated content</p>
+      </div>
+
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <input type="checkbox" name="use_description" id="use_description" checked
+                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+        </div>
+        <div class="ml-3 text-sm">
+          <label for="use_description" class="font-medium text-gray-700 dark:text-gray-300">
+            Use existing description as guidance
+          </label>
+          <p class="text-gray-500 dark:text-gray-400">Include current description when generating new content</p>
+        </div>
+      </div>
+
+      <div class="pt-4 flex space-x-3">
+        <button type="submit"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                onclick="return confirm('This will replace the current article body. Are you sure?')">
+          🔄 Regenerate Content
+        </button>
+        <a href="{% url 'admin:blog_article_change' article.pk %}"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{# templates/admin/base_site.html #}
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {# Always include our JS and optional CSS for the Gemini button #}
+  <link rel="stylesheet" href="{% static 'admin/css/gemini_button.css' %}">
+  <script src="{% static 'admin/js/gemini_button.js' %}" defer></script>
+{% endblock %}

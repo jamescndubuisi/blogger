@@ -1,0 +1,9 @@
+{# templates/unfold/base_site.html #}
+{% extends "unfold/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/gemini_button.css' %}">
+  <script src="{% static 'admin/js/gemini_button.js' %}" defer></script>
+{% endblock %}

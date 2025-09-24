@@ -1,0 +1,62 @@
+{# templates/admin/base_site.html #}
+{#{% extends "admin/base_site.html" %}#}
+{#{% load static %}#}
+{#{% block extrahead %}#}
+{#  {{ block.super }}#}
+{#  <script>#}
+{#  document.addEventListener('DOMContentLoaded', function(){#}
+{#    // Match article change URL like: /admin/blog/article/<id>/change/#}
+{#    var m = window.location.pathname.match(/\/admin\/blog\/article\/(\d+)\/change\/?$/);#}
+{#    if(!m) return;#}
+{#    var objectId = m[1];#}
+{##}
+{#    // possible toolbar selectors used by different admin themes (including Unfold)#}
+{#    var selectors = [#}
+{#      '.object-tools',          // default admin#}
+{#      '.page-title-actions',    // some themes#}
+{#      '.admin-object-actions',  // guess#}
+{#      '.unfold-topbar',         // guess for Unfold — keep broad#}
+{#      '.view-title'             // fallback#}
+{#    ];#}
+{##}
+{#    var toolbar = null;#}
+{#    for(var i=0;i<selectors.length;i++){#}
+{#      toolbar = document.querySelector(selectors[i]);#}
+{#      if(toolbar) break;#}
+{#    }#}
+{#    if(!toolbar){#}
+{#      // fallback: try to find header or h1 area#}
+{#      toolbar = document.querySelector('.content-header') || document.querySelector('.content');#}
+{#      if(!toolbar) return;#}
+{#    }#}
+{##}
+{#    // Avoid duplicate button#}
+{#    if (document.getElementById('gemini-generate-btn')) return;#}
+{##}
+{#    var a = document.createElement('a');#}
+{#    a.id = 'gemini-generate-btn';#}
+{#    a.href = '/admin/blog/article/' + objectId + '/generate_gemini/';#}
+{#    a.className = 'addlink';#}
+{#    a.innerText = 'Generate with Gemini';#}
+{##}
+{#    // style to match admin look (you can tune this to match Unfold)#}
+{#    a.style.marginLeft = '8px';#}
+{#    a.style.padding = '6px 10px';#}
+{#    a.style.borderRadius = '6px';#}
+{#    a.style.fontSize = '0.9rem';#}
+{#    a.style.background = '#4f46e5';#}
+{#    a.style.color = 'white';#}
+{#    a.style.textDecoration = 'none';#}
+{#    a.style.display = 'inline-block';#}
+{##}
+{#    // If toolbar is a list (ul), wrap in li#}
+{#    if (toolbar.tagName.toLowerCase() === 'ul') {#}
+{#      var li = document.createElement('li');#}
+{#      li.appendChild(a);#}
+{#      toolbar.appendChild(li);#}
+{#    } else {#}
+{#      toolbar.appendChild(a);#}
+{#    }#}
+{#  });#}
+{#  </script>#}
+{#{% endblock %}#}
